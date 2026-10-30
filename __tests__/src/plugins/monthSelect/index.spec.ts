@@ -17,7 +17,6 @@ const createInstance = (options?: Options, pluginConfig?: PluginConfig) =>
   });
 
 describe("monthSelect", () => {
-  // memoized instance
   const fp = (): Instance => {
     return (fpInstance =
       fpInstance ||
@@ -109,6 +108,18 @@ describe("monthSelect", () => {
         expect(fp().currentYearElement.value).toEqual(`${thisYear + 1}`);
       });
 
+      it("does not crash when changing years before selecting a month", () => {
+        fp().input.dispatchEvent(new MouseEvent("click"));
+        getPrevButton().dispatchEvent(new MouseEvent("click"));
+
+        expect(() => {
+          fp().rContainer!.querySelectorAll(".flatpickr-monthSelect-month")[0]!
+            .dispatchEvent(new MouseEvent("click"));
+        }).not.toThrow();
+
+        expect(fp().currentYearElement.value).toEqual(`${thisYear - 1}`);
+      });
+
       describe("when current month is not Jan/Dec (#2275)", () => {
         beforeEach(() => {
           options = { defaultDate: new Date(`${thisYear}-03-20`) };
@@ -148,13 +159,13 @@ describe("monthSelect", () => {
             minDate: `${thisYear - 1}-03-20`,
           };
 
-          fp().input.dispatchEvent(new MouseEvent("click")); // open flatpickr
+          fp().input.dispatchEvent(new MouseEvent("click"));
 
           fp()
             .rContainer!.querySelectorAll(".flatpickr-monthSelect-month")![1]
-            .dispatchEvent(new MouseEvent("click")); // pick start date
+            .dispatchEvent(new MouseEvent("click"));
 
-          document.dispatchEvent(new MouseEvent("click")); // abandon input
+          document.dispatchEvent(new MouseEvent("click"));
         });
 
         it("still honors minDate options", () => {
@@ -217,7 +228,7 @@ describe("monthSelect", () => {
       beforeEach(() => {
         options = { mode: "range" };
 
-        fp().input.dispatchEvent(new MouseEvent("click")); // open flatpickr
+        fp().input.dispatchEvent(new MouseEvent("click"));
         getMonthCells()[1].dispatchEvent(new MouseEvent("click"));
       });
 
@@ -250,7 +261,7 @@ describe("monthSelect", () => {
         describe("and then prematurely abandoning input", () => {
           describe("by clicking out", () => {
             beforeEach(() => {
-              document.dispatchEvent(new MouseEvent("mousedown")); // close flatpickr
+              document.dispatchEvent(new MouseEvent("mousedown"));
             });
 
             it("clears the highlighting", () => {
@@ -304,19 +315,19 @@ describe("monthSelect", () => {
       beforeEach(() => {
         options = { mode: "range" };
 
-        fp().input.dispatchEvent(new MouseEvent("click")); // open flatpickr
+        fp().input.dispatchEvent(new MouseEvent("click"));
         getMonthCells()[1].dispatchEvent(new MouseEvent("click"));
         getMonthCells()[5].dispatchEvent(new MouseEvent("click"));
       });
 
       describe("when clicking again to start over", () => {
         beforeEach(() => {
-          fp().input.dispatchEvent(new MouseEvent("click")); // reopen flatpickr
+          fp().input.dispatchEvent(new MouseEvent("click"));
 
           getMonthCells()[3].dispatchEvent(new MouseEvent("click"));
           getMonthCells()[3].dispatchEvent(
             new MouseEvent("mouseover", { bubbles: true })
-          ); // class changes seem to be triggered by hover, not click...
+          );
         });
 
         it("clears the highlighting", () => {

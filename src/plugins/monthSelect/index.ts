@@ -179,10 +179,15 @@ function monthSelectPlugin(pluginConfig?: Partial<Config>): Plugin {
           ".flatpickr-monthSelect-month"
         );
         months.forEach((month) => {
-          month.dateObj.setFullYear(fp.currentYear);
+          if (!(month instanceof Element) || !(month as ElementDate).dateObj) return;
+
+          const monthDate = (month as ElementDate).dateObj;
+          if (!(monthDate instanceof Date)) return;
+
+          monthDate.setFullYear(fp.currentYear);
           if (
-            (fp.config.minDate && month.dateObj < fp.config.minDate) ||
-            (fp.config.maxDate && month.dateObj > fp.config.maxDate)
+            (fp.config.minDate && monthDate < fp.config.minDate) ||
+            (fp.config.maxDate && monthDate > fp.config.maxDate)
           ) {
             month.classList.add("flatpickr-disabled");
           } else {
